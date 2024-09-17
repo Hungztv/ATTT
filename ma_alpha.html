@@ -4,80 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa và Giải mã</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        label {
-            font-size: 14px;
-            color: #666;
-        }
-
-        input, select, button, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-
-        input:focus, textarea:focus, select:focus, button:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-         
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        textarea {
-            resize: none;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .result {
-            margin-top: 30px;
-        }
-
-        #clearFileButton {
-            background-color: #dc3545;
-            display: none;
-        }
-
-        #clearFileButton:hover {
-            background-color: #c82333;
-        }
-        
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -100,7 +27,7 @@
 
     <button id="clearFileButton" onclick="clearFile()">Xóa tệp đã chọn</button>
 
-   
+    <button onclick="generateRandomKeys()">Tạo khóa ngẫu nhiên</button> 
    <button onclick="encrypt()">Mã hóa</button>
     <button onclick="decrypt()">Giải mã</button>
     <button onclick="savefile()">Lưu bản mã</button>
@@ -138,24 +65,18 @@
         document.getElementById('inputText').value = ''; // Xóa nội dung văn bản
         document.getElementById('clearFileButton').style.display = 'none'; // Ẩn nút xóa tệp
     }
-    // Lưu file đã mã hóa
-    function savefile(){
-        let encryptedText = document.getElementById('encryptedText').value;
-    
-    
-    let blob = new Blob([encryptedText], { type: 'text/plain' });
-    
-    // Tạo đường dẫn tải về
-    let link = document.createElement('a');
+    function savefile() {
+    const encryptedText = document.getElementById('encryptedText').value;
+    const aKey = document.getElementById('aKey').value;
+    const bKey = document.getElementById('bKey').value;
+
+    const fileContent = `aKey: ${aKey}\nbKey: ${bKey}\n\nEncrypted Text:\n${encryptedText}`;
+    const blob = new Blob([fileContent], { type: 'text/plain' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'encrypted_text.txt';
-    
-    // Kích hoạt sự kiện click để tải về
     link.click();
-
-    // Giải phóng bộ nhớ
-    URL.revokeObjectURL(link.href);  
-    }
+}
 
      // Tính nghịch đảo modulo của a
      function modInverse(a, m) {
@@ -166,8 +87,47 @@
         }
         return -1; // Không có nghịch đảo
     }
+    function isCoprime(a, b) {
+    function gcd(x, y) {
+        while (y !== 0) {
+            let temp = y;
+            y = x % y;
+            x = temp;
+        }
+        return x;
+    }
+    return gcd(a, b) === 1;
+}
+function generateRandomKeys() {
+    let aKey;
+    do {
+        aKey = Math.floor(Math.random() * 25) + 1; // Random number between 1 and 25
+    } while (!isCoprime(aKey, 26));
+
+    const bKey = Math.floor(Math.random() * 26); // Random number between 0 and 25
+
+    document.getElementById('aKey').value = aKey;
+    document.getElementById('bKey').value = bKey;
+}
+    function validateKeys() {
+    const aKey = parseInt(document.getElementById('aKey').value, 10);
+    const bKey = parseInt(document.getElementById('bKey').value, 10);
+
+    if (!isCoprime(aKey, 26)) {
+        alert('Giá trị a phải nguyên tố cùng nhau với 26.');
+        return false;
+    }
+
+    if (bKey < 0 || bKey > 25) {
+        alert('Giá trị b phải nằm trong khoảng từ 0 đến 25.');
+        return false;
+    }
+
+    return true;
+}
      // Mã hóa Affine
     function encrypt() {
+        if (!validateKeys()) return;
         const inputText = document.getElementById('inputText').value.toUpperCase();
         const a = parseInt(document.getElementById('aKey').value);
         const b = parseInt(document.getElementById('bKey').value);
@@ -188,6 +148,7 @@
     }
      // Giải mã Affine
      function decrypt() {
+        if (!validateKeys()) return;
         const encryptedText = document.getElementById('encryptedText').value.toUpperCase();
         const a = parseInt(document.getElementById('aKey').value);
         const b = parseInt(document.getElementById('bKey').value);
@@ -215,18 +176,25 @@
         function swap1(){
             window.location.href = "BT1.html"
         }
-    function showButtons() {
+        document.addEventListener('DOMContentLoaded', (event) => {
+    const button1 = document.getElementById('button1');
+    const button2 = document.getElementById('button2');
+    button1.style.display = 'none';
+    button2.style.display = 'none';
+});
+
+function showButtons() {
     const button1 = document.getElementById('button1');
     const button2 = document.getElementById('button2');
                 
-    if (button1.style.display === 'block') {
-                    button1.style.display = 'none';
-                    button2.style.display = 'none';
-     } else {
-                    button1.style.display = 'block';
-                    button2.style.display = 'block';
-     }
+    if (button1.style.display === 'none') {
+        button1.style.display = 'block';
+        button2.style.display = 'block';
+    } else {
+        button1.style.display = 'none';
+        button2.style.display = 'none';
     }
+}
 </script>
 
 </body>
