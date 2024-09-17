@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã hóa và Giải mã</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        input, select, button, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        input:focus, textarea:focus, select:focus, button:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+         
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        textarea {
+            resize: none;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .result {
+            margin-top: 30px;
+        }
+
+        #clearFileButton {
+            background-color: #dc3545;
+            display: none;
+        }
+
+        #clearFileButton:hover {
+            background-color: #c82333;
+        }
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Mã ceasar</h1>
+
+    <label for="inputText">Nhập văn bản hoặc tải lên file:</label>
+    <textarea id="inputText" placeholder="Nhập văn bản tại đây..."></textarea>
+
+    <label for="fileInput">Tải file văn bản (.txt):</label>
+    <input type="file" id="fileInput" accept=".txt">
+
+    <button id="clearFileButton" onclick="clearFile()">Xóa tệp đã chọn</button>
+
+    <label for="key">Nhập khóa K (0 - 25):</label>
+    <input type="number" id="key" min="0" max="25" value="0">
+   <button onclick="encrypt()">Mã hóa</button>
+    <button onclick="decrypt()">Giải mã</button>
+    <button onclick="savefile()">Lưu bản mã</button>
+    <button onclick="showButtons()">Chọn Option Mã Hóa</button>
+    <button id="button1" class="hidden" onclick="swap()">Chuyễn Mã Thay Thế</button>
+    <button id="button2" class="hidden" onclick="swap1()">Chuyễn mã Affine</button>
+  
+
+    <div class="result">
+        <h3>Kết quả:</h3>
+        <label for="encryptedText">Bản mã:</label>
+        <textarea id="encryptedText" readonly></textarea>
+
+        <label for="decryptedText">Bản gốc (Giải mã):</label>
+        <textarea id="decryptedText" readonly></textarea>
+    </div>
+</div>
+
+<script>
+    // Đọc file và hiển thị nội dung vào textarea
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileContent = e.target.result;
+                document.getElementById('inputText').value = fileContent;
+                document.getElementById('clearFileButton').style.display = 'inline-block'; // Hiển thị nút xóa tệp
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    // Xóa file đã chọn và nội dung văn bản
+    function clearFile() {
+        document.getElementById('fileInput').value = ''; // Xóa file đã chọn
+        document.getElementById('inputText').value = ''; // Xóa nội dung văn bản
+        document.getElementById('clearFileButton').style.display = 'none'; // Ẩn nút xóa tệp
+    }
+    // Lưu file đã mã hóa
+    function savefile(){
+        let encryptedText = document.getElementById('encryptedText').value;
+    
+    
+    let blob = new Blob([encryptedText], { type: 'text/plain' });
+    
+    // Tạo đường dẫn tải về
+    let link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'encrypted_text.txt';
+    
+    // Kích hoạt sự kiện click để tải về
+    link.click();
+
+    // Giải phóng bộ nhớ
+    URL.revokeObjectURL(link.href);  
+    }
+
+    // Mã hóa
+    function encrypt() {
+        let inputText = document.getElementById('inputText').value;
+        let key = parseInt(document.getElementById('key').value);
+        let encryptedText = '';
+
+        for (let i = 0; i < inputText.length; i++) {
+let char = inputText.charAt(i);
+
+            if (char.match(/[a-z]/i)) {
+                let code = inputText.charCodeAt(i);
+
+               
+                if (code >= 65 && code <= 90) {
+                    encryptedText += String.fromCharCode(((code - 65 + key) % 26) + 65);
+                }
+                
+                else if (code >= 97 && code <= 122) {
+                    encryptedText += String.fromCharCode(((code - 97 + key) % 26) + 97);
+                }
+            } else {
+                encryptedText += char; 
+            }
+        }
+
+        document.getElementById('encryptedText').value = encryptedText;
+    }
+   
+    // Giải mã
+    function decrypt() {
+        let encryptedText = document.getElementById('encryptedText').value;
+        let key = parseInt(document.getElementById('key').value);
+        let decryptedText = '';
+
+        for (let i = 0; i < encryptedText.length; i++) {
+            let char = encryptedText.charAt(i);
+
+            if (char.match(/[a-z]/i)) {
+                let code = encryptedText.charCodeAt(i);
+
+                
+                if (code >= 65 && code <= 90) {
+                    decryptedText += String.fromCharCode(((code - 65 - key + 26) % 26) + 65);
+                }
+              
+                else if (code >= 97 && code <= 122) {
+                    decryptedText += String.fromCharCode(((code - 97 - key + 26) % 26) + 97);
+                }
+            } else {
+                decryptedText += char; 
+            }
+        }
+
+        document.getElementById('decryptedText').value = decryptedText;
+    }
+    function swap() {
+            window.location.href = "hoanvithaythe.html"; 
+        }
+    function swap1(){
+        window.location.href = "ma_alpha.html"
+    }
+    function showButtons() {
+    const button1 = document.getElementById('button1');
+    const button2 = document.getElementById('button2');
+                
+    if (button1.style.display === 'block') {
+                    button1.style.display = 'none';
+                    button2.style.display = 'none';
+     } else {
+                    button1.style.display = 'block';
+                    button2.style.display = 'block';
+     }
+    }
+</script>
+
+</body>
+</html>
