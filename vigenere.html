@@ -3,33 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã Thay Thế Hoán Vị Tự Động</title>
+    <title>Mã hóa và Giải mã Vigenère</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-    <h1>Mã Thay Thế Hoán Vị Tự Động</h1>
+    <h1>Mã Vigenère</h1>
 
-    <label for="inputText">Nhập văn bản:</label>
+    <label for="inputText">Nhập văn bản hoặc tải lên file:</label>
     <textarea id="inputText" placeholder="Nhập văn bản tại đây..."></textarea>
+
     <label for="fileInput">Tải file văn bản (.txt):</label>
     <input type="file" id="fileInput" accept=".txt">
 
-    <button onclick="generateKey()">Tạo Bảng Thay Thế</button>
     <button id="clearFileButton" onclick="clearFile()">Xóa tệp đã chọn</button>
-    <div id="substitutionAlphabetContainer" style="display: none;">
-        <h3>Bảng Thay Thế:</h3>
-        <p id="substitutionAlphabet"></p>
-    </div>
-
-    <button onclick="encrypt()">Mã hóa</button>
+    <label for="key">Nhập khóa (chuỗi ký tự):</label>
+    <input type="text" id="key" placeholder="Nhập khóa tại đây...">
+   <button onclick="encrypt()">Mã hóa</button>
     <button onclick="decrypt()">Giải mã</button>
     <button onclick="savefile()">Lưu bản mã</button>
     <button onclick="showButtons()">Chọn Option Mã Hóa</button>
-    <button style="background-color: brown;" id="button1" class="hidden" onclick="swap()">Chuyển Mã ceasar</button>
+    <button style="background-color: brown;" id="button1" class="hidden" onclick="swap()">Chuyễn Mã Thay Thế</button>
     <button style="background-color: brown;" id="button2" class="hidden" onclick="swap1()">Chuyễn mã Affine</button>
-    <button style="background-color: brown;" id="button3" class="hidden" onclick="swap2()">Chuyễn mã Vigenère</button>
+    <button style="background-color: brown;" id="button3" class="hidden" onclick="swap2()">Chuyễn mã Ceasar</button>
+  
 
     <div class="result">
         <h3>Kết quả:</h3>
@@ -42,25 +40,7 @@
 </div>
 
 <script>
-    let originalAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    let substitutionAlphabet = '';
-
-    // Hàm xáo trộn bảng chữ cái
-    function shuffleAlphabet(alphabet) {
-        let array = alphabet.split('');
-        for (let i = array.length - 1; i > 0; i--) {
-            let j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]]; // Hoán vị ngẫu nhiên
-        }
-        return array.join('');
-    }
-
-    // Tạo bảng thay thế
-    function generateKey() {
-        substitutionAlphabet = shuffleAlphabet(originalAlphabet);
-        document.getElementById('substitutionAlphabet').textContent = substitutionAlphabet;
-        document.getElementById('substitutionAlphabetContainer').style.display = 'block';
-    }
+    // Đọc file và hiển thị nội dung vào textarea
     document.getElementById('fileInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
@@ -82,10 +62,11 @@
     }
     // Lưu file đã mã hóa
     function savefile(){
-    let encryptedText = document.getElementById('encryptedText').value;
+        let encryptedText = document.getElementById('encryptedText').value;
+    
+    
     let blob = new Blob([encryptedText], { type: 'text/plain' });
-    // lưu bảng mã thay thế
-    let blob1 = new Blob([substitutionAlphabet], { type: 'text/plain' });
+    
     // Tạo đường dẫn tải về
     let link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -97,54 +78,62 @@
     // Giải phóng bộ nhớ
     URL.revokeObjectURL(link.href);  
     }
+
     // Mã hóa
     function encrypt() {
-        let inputText = document.getElementById('inputText').value;
+        let inputText = document.getElementById('inputText').value.toUpperCase();
+        let key = document.getElementById('key').value.toUpperCase();
         let encryptedText = '';
+        let keyIndex = 0;
 
         for (let i = 0; i < inputText.length; i++) {
-            let char = inputText.charAt(i);
-            let index = originalAlphabet.indexOf(char);
-
-            if (index !== -1) {
-                encryptedText += substitutionAlphabet[index]; // Thay thế ký tự
+            let char = inputText[i];
+            if (char.match(/[A-Z]/)) {
+                let inputCharCode = char.charCodeAt(0) - 65;
+                let keyCharCode = key[keyIndex % key.length].charCodeAt(0) - 65;
+                let encryptedChar = String.fromCharCode(((inputCharCode + keyCharCode) % 26) + 65);
+                encryptedText += encryptedChar;
+                keyIndex++;
             } else {
-                encryptedText += char; // Giữ nguyên ký tự không có trong bảng chữ cái
+                encryptedText += char; // Không mã hóa các ký tự không phải chữ cái
             }
         }
 
         document.getElementById('encryptedText').value = encryptedText;
     }
-
+   
     // Giải mã
     function decrypt() {
-        let encryptedText = document.getElementById('encryptedText').value;
+        let encryptedText = document.getElementById('encryptedText').value.toUpperCase();
+        let key = document.getElementById('key').value.toUpperCase();
         let decryptedText = '';
+        let keyIndex = 0;
 
         for (let i = 0; i < encryptedText.length; i++) {
-            let char = encryptedText.charAt(i);
-            let index = substitutionAlphabet.indexOf(char);
-
-            if (index !== -1) {
-                decryptedText += originalAlphabet[index]; // Thay thế ký tự về bảng chữ cái gốc
+            let char = encryptedText[i];
+            if (char.match(/[A-Z]/)) {
+                let encryptedCharCode = char.charCodeAt(0) - 65;
+                let keyCharCode = key[keyIndex % key.length].charCodeAt(0) - 65;
+                let decryptedChar = String.fromCharCode(((encryptedCharCode - keyCharCode + 26) % 26) + 65);
+                decryptedText += decryptedChar;
+                keyIndex++;
             } else {
-                decryptedText += char; // Giữ nguyên ký tự không có trong bảng chữ cái
+                decryptedText += char; // Không giải mã các ký tự không phải chữ cái
             }
         }
 
         document.getElementById('decryptedText').value = decryptedText;
     }
+
     function swap() {
-            window.location.href = "BT1.html"; 
-           
+            window.location.href = "hoanvithaythe.html"; 
         }
-    function swap1() {
-          window.location.href = "ma_alpha.html"
+    function swap1(){
+        window.location.href = "ma_alpha.html"
     }
-    function swap2() {
-          window.location.href = "vigenere.html"
+    function swap2(){
+        window.location.href = "BT1.html"
     }
-        
     document.addEventListener('DOMContentLoaded', (event) => {
     const button1 = document.getElementById('button1');
     const button2 = document.getElementById('button2');
@@ -169,7 +158,6 @@ function showButtons() {
         button3.style.display = 'none';
     }
 }
-        
 </script>
 
 </body>

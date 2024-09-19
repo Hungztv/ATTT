@@ -32,8 +32,9 @@
     <button onclick="decrypt()">Giải mã</button>
     <button onclick="savefile()">Lưu bản mã</button>
     <button onclick="showButtons()">Chọn Option Mã Hóa</button>
-    <button id="button1" class="hidden" onclick="swap1()">Chuyển Mã ceasar</button>
-    <button id="button2" class="hidden" onclick="swap()">Chuyễn mã thay thế</button>
+    <button style="background-color: brown;" id="button1" class="hidden" onclick="swap1()">Chuyển Mã ceasar</button>
+    <button style="background-color: brown;" id="button2" class="hidden" onclick="swap()">Chuyễn mã thay thế</button>
+    <button style="background-color: brown;" id="button3" class="hidden" onclick="swap2()">Chuyễn mã Vigenère</button>
     <div class="result">
         <h3>Kết quả:</h3>
         <label for="encryptedText">Bản mã:</label>
@@ -176,23 +177,31 @@ function generateRandomKeys() {
         function swap1(){
             window.location.href = "BT1.html"
         }
+        function swap2(){
+            window.location.href = "vigenere.html"
+        }
         document.addEventListener('DOMContentLoaded', (event) => {
     const button1 = document.getElementById('button1');
     const button2 = document.getElementById('button2');
+    const button3 = document.getElementById('button3');
     button1.style.display = 'none';
     button2.style.display = 'none';
+    button3.style.display = 'none';
 });
 
 function showButtons() {
     const button1 = document.getElementById('button1');
     const button2 = document.getElementById('button2');
+    const button3 = document.getElementById('button3');
                 
     if (button1.style.display === 'none') {
         button1.style.display = 'block';
         button2.style.display = 'block';
+        button3.style.display = 'block';
     } else {
         button1.style.display = 'none';
         button2.style.display = 'none';
+        button3.style.display = 'none';
     }
 }
 </script>
