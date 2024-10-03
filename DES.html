@@ -1,0 +1,86 @@
+<html lang="en"></html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã hóa và Giải mã DES</title>
+    <!-- Thư viện CryptoJS để hỗ trợ mã hóa và giải mã DES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Mã hóa và Giải mã DES</h1>
+
+        <label for="inputText">Nhập văn bản hoặc tải lên file:</label>
+        <textarea id="inputText" placeholder="Nhập văn bản tại đây..."></textarea>
+
+        <label for="fileInput">Tải file văn bản (.txt):</label>
+        <input type="file" id="fileInput" accept=".txt">
+
+        <button id="clearFileButton" onclick="clearFile()">Xóa tệp đã chọn</button>
+
+        <label for="key">Nhập khóa (16 ký tự):</label>
+        <input type="text" id="key" placeholder="Nhập khóa tại đây...">
+
+        <button onclick="encrypt()">Mã hóa</button>
+        <button onclick="decrypt()">Giải mã</button>
+        <button onclick="savefile()">Lưu bản mã</button>
+        <button onclick="showButtons()">Chọn Option Mã Hóa</button>
+        <button style="background-color: brown;" id="button1" class="hidden" onclick="swap()">Chuyển Mã thay thế</button>
+        <button style="background-color: brown;" id="button2" class="hidden" onclick="swap1()">Chuyển Mã Affine</button>
+        <button style="background-color: brown;" id="button3" class="hidden" onclick="swap2()">Chuyển Mã Vigenère</button>
+
+        <div class="result">
+            <h3>Kết quả:</h3>
+            <label for="encryptedText">Bản mã:</label>
+            <textarea id="encryptedText" readonly></textarea>
+
+            <label for="decryptedText">Bản gốc (Giải mã):</label>
+            <textarea id="decryptedText" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Đọc file và hiển thị nội dung vào textarea
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fileContent = e.target.result;
+                    document.getElementById('inputText').value = fileContent;
+                    document.getElementById('clearFileButton').style.display = 'inline-block'; // Hiển thị nút xóa tệp
+                };
+                reader.readAsText(file);
+            }
+        });
+function encryptDES() {
+    const inputText = document.getElementById('inputText').value;
+    const desKey = document.getElementById('desKey').value;
+
+    // Kiểm tra độ dài khóa
+    if (desKey.length !== 8) {
+        alert('Khóa DES phải có đúng 8 ký tự.');
+        return;
+    }
+
+    // Thực hiện mã hóa DES
+    const encrypted = CryptoJS.DES.encrypt(inputText, desKey);
+    document.getElementById('desEncryptedText').value = encrypted.toString();
+}
+
+function decryptDES() {
+    const encryptedText = document.getElementById('desEncryptedText').value;
+    const desKey = document.getElementById('desKey').value;
+
+    // Kiểm tra độ dài khóa
+    if (desKey.length !== 8) {
+        alert('Khóa DES phải có đúng 8 ký tự.');
+        return;
+    }
+
+    // Thực hiện giải mã DES
+    const decrypted = CryptoJS.DES.decrypt(encryptedText, desKey);
+    document.getElementById('desDecryptedText').value = decrypted.toString(CryptoJS.enc.Utf8);
+}
+</script>
